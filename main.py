@@ -81,10 +81,23 @@ def visualize_net_worth(data):
     st.dataframe(asset_df)
     st.write("Liabilities")
     st.dataframe(liability_df)
-    if assets:
+    # Filter out assets with missing or negative values
+    pie_values = []
+    pie_labels = []
+    for a in assets:
+        try:
+            value = float(a['value']['units'])
+            if value >= 0:
+                pie_values.append(value)
+                pie_labels.append(a['netWorthAttribute'])
+        except (KeyError, ValueError, TypeError):
+            continue
+    if pie_values:
         fig, ax = plt.subplots()
-        ax.pie([float(a['value']['units']) for a in assets], labels=[a['netWorthAttribute'] for a in assets], autopct='%1.1f%%')
+        ax.pie(pie_values, labels=pie_labels, autopct='%1.1f%%')
         st.pyplot(fig)
+    else:
+        st.info("No valid asset values to plot.")
 
 def visualize_stock_transactions(data):
     st.subheader("Stock Transactions")
